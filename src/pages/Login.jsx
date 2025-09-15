@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAtom } from "jotai";
 import { tokenAtom, userAtom } from "../atoms/authAtom";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const Login = () => {
   const [identifier, setIdentifier] = useState("");
@@ -23,6 +24,9 @@ const Login = () => {
       setToken(data.jwt);
       setUser(data.user);
 
+      Cookies.set("token", data.jwt, { expires: 7 });
+      Cookies.set("user", JSON.stringify(data.user), { expires: 7 });
+      
       navigate("/profile");
     } else {
       alert("Identifiants incorrects");
