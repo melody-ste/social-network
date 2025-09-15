@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAtom } from "jotai";
 import { tokenAtom, userAtom } from "../atoms/authAtom";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -9,6 +10,7 @@ const Register = () => {
 
   const [, setToken] = useAtom(tokenAtom);
   const [, setUser] = useAtom(userAtom);
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -24,6 +26,10 @@ const Register = () => {
     if (data.jwt) {
       setToken(data.jwt);
       setUser(data.user);
+
+        navigate("/profile");
+    } else {
+      alert("Identifiants incorrects");
     }
   };
 
