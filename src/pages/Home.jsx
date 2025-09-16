@@ -128,7 +128,7 @@ const Home = () => {
 
   if (!token) {
     return (
-      <div>
+      <div className="container">
         <h1>Bienvenue sur My Network</h1>
         <p>
           Ce site est un entraînement à React, à la gestion d’état global et aux tokens. L’objectif est de mettre en pratique l’authentification et le routage pour créer un petit réseau social.
@@ -138,33 +138,36 @@ const Home = () => {
   }
 
   return (
-    <div>
+    <div className="container">
       <h1>Accueil</h1>
-
-      <form onSubmit={handleCreatePost}>
-        <input
-          type="text"
-          placeholder="Exprime-toi..."
-          value={newPost}
-          onChange={(e) => setNewPost(e.target.value)}
-        />
-        <button type="submit">post</button>
-      </form>
+      <div className="card">
+        <form onSubmit={handleCreatePost}>
+          <input
+            type="text"
+            placeholder="Exprime-toi..."
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+          />
+          <button type="submit">post</button>
+        </form>
+      </div>
 
       <h2>Posts</h2>
       {posts.map((post) => (
-        <div key={post.id}>
-          <p>{post.text}</p>
-          <p>
-            Par:{" "}
-            <Link to={`/profile/${post.author.id}`}>{post.author.username}</Link>
-          </p>
-          <button onClick={() => handleLikePost(post)}>
-            Like ({post.like})
-          </button>
-          {post.author.id === user.id && (
-            <button onClick={() => handleDeletePost(post.id)}>Supprimer</button>
-          )}
+        <div className="card">
+          <div key={post.id}>
+            <p>{post.text}</p>
+            <p>
+              Par:{" "}
+              <Link to={`/profile/${post.author.id}`}>{post.author.username}</Link>
+            </p>
+            <button onClick={() => handleLikePost(post)}>
+              Like ({post.like})
+            </button>
+            {post.author.id === user.id && (
+              <button onClick={() => handleDeletePost(post.id)}>Supprimer</button>
+            )}
+          </div>
         </div>
       ))}
     </div>

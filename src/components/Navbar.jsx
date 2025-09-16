@@ -22,6 +22,8 @@ const Navbar = () => {
         <li>
           <Link to="/">Accueil</Link>
         </li>
+      </ul>
+      <ul>
         {!token ? (
           <>
             <li>

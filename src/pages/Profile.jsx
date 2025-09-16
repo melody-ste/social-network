@@ -81,28 +81,31 @@ const Profile = () => {
   if (!user) return <p>Vous devez être connecté pour voir cette page.</p>;
 
   return (
-   <div>
+   <div className="container">
       <h1>Mon Profil</h1>
-
-      <p><strong>Email :</strong> {user.email}</p>
-      <p><strong>Username :</strong> {user.username}</p>
-      <p><strong>Description :</strong> {user.description || "Aucune description"}</p>
+      <div className="card">
+        <h3>{user.username}</h3>
+        <p><strong>Email :</strong> {user.email}</p>
+        <p><strong>Description :</strong> {user.description || "Aucune description"}</p>
+      </div>
 
       <h2>Modifier mon profil</h2>
-      <form onSubmit={handleUpdate}>
-        <input
-          type="text"
-          placeholder="Nouveau username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <textarea
-          placeholder="Votre description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button type="submit">Mettre à jour</button>
-      </form>
+      <div className="card">
+        <form onSubmit={handleUpdate}>
+          <input
+            type="text"
+            placeholder="Nouveau username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <textarea
+            placeholder="Votre description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <button type="submit">Mettre à jour</button>
+        </form>
+      </div>
    </div>
   );
 };
