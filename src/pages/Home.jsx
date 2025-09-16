@@ -12,22 +12,25 @@ const Home = () => {
   // ===== CHARGER POST =====
   const fetchPosts = async () => {
     if (!token) return;
+
     try {
-      const res = await fetch( "http://localhost:1337/api/posts?populate=author,users_likes", {
+      const res = await fetch(
+        "http://localhost:1337/api/posts?populate[author]=*&populate[users_likes]=*",
+        {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
       const json = await res.json();
 
-      const postsArray = json.data.map(post => ({
+      const postsArray = json.data.map((post) => ({
         id: post.id,
         text: post.attributes.text,
         like: post.attributes.like || 0,
-        users_likes: post.attributes.users_likes?.data?.map(u => u.id) || [],
+        users_likes: post.attributes.users_likes?.data?.map((u) => u.id) || [],
         author: post.attributes.author?.data
           ? {
               id: post.attributes.author.data.id,
-              username: post.attributes.author.data.attributes.username
+              username: post.attributes.author.data.attributes.username,
             }
           : { id: null, username: "Utilisateur inconnu" },
       }));
@@ -57,23 +60,18 @@ const Home = () => {
         body: JSON.stringify({
           data: {
             text: newPost,
-            author: { connect: user.id },
+            author: { connect: [user.id] },
           },
         }),
       });
 
       const json = await res.json();
-      console.log(json);
-      // On ajoute directement le post à la liste pour éviter "Utilisateur inconnu"
       const newPostData = {
         id: json.data.id,
         text: json.data.attributes.text,
         like: json.data.attributes.like || 0,
         users_likes: [],
-        author: {
-          id: user.id,
-          username: user.username,
-        },
+        author: { id: user.id, username: user.username },
       };
 
       setPosts([newPostData, ...posts]);
@@ -100,12 +98,10 @@ const Home = () => {
 
   // ===== LIKE POST =====
   const handleLikePost = async (post) => {
-    if (post.users_likes.includes(user.id)) return;
+    const hasLiked = post.users_likes.includes(user.id);
+    const updatedLikes = hasLiked ? post.like - 1 : post.like + 1;
 
     try {
-      const updatedLikes = post.like + 1;
-      const updatedUsers = [...post.users_likes, user.id];
-
       await fetch(`http://localhost:1337/api/posts/${post.id}`, {
         method: "PUT",
         headers: {
@@ -113,10 +109,9 @@ const Home = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          data: {
+           data: {
             like: updatedLikes,
-            users_likes: updatedUsers,
-          },
+            users_likes: hasLiked? { disconnect: [user.id] } : { connect: [user.id] }},
         }),
       });
 
@@ -154,21 +149,21 @@ const Home = () => {
 
       <h2>Posts</h2>
       {posts.map((post) => (
-        <div className="card">
-          <div key={post.id}>
-            <p>{post.text}</p>
-            <p>
-              Par:{" "}
-              <Link to={`/profile/${post.author.id}`}>{post.author.username}</Link>
-            </p>
-            <button onClick={() => handleLikePost(post)}>
-              Like ({post.like})
-            </button>
-            {post.author.id === user.id && (
-              <button onClick={() => handleDeletePost(post.id)}>Supprimer</button>
-            )}
-          </div>
+        
+        <div className="card" key={post.id}>
+          <p>{post.text}</p>
+          <p>
+            Par:{" "}
+            <Link to={`/profile/${post.author.id}`}>{post.author.username}</Link>
+          </p>
+          <button onClick={() => handleLikePost(post)}>
+            Like ({post.like})
+          </button>
+          {post.author.id === user.id && (
+            <button onClick={() => handleDeletePost(post.id)}>Supprimer</button>
+          )}
         </div>
+        
       ))}
     </div>
   );
