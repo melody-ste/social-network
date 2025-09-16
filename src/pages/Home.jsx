@@ -9,39 +9,121 @@ const Home = () => {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
 
-  // Charger les posts
+  // ===== CHARGER POST =====
   const fetchPosts = async () => {
-    const res = await fetch("http://localhost:1337/api/posts", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await res.json();
-    
-    setPosts(data.reverse()); 
+    if (!token) return;
+    try {
+      const res = await fetch( "http://localhost:1337/api/posts?populate=author,users_likes", {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const json = await res.json();
+
+      const postsArray = json.data.map(post => ({
+        id: post.id,
+        text: post.attributes.text,
+        like: post.attributes.like || 0,
+        users_likes: post.attributes.users_likes?.data?.map(u => u.id) || [],
+        author: post.attributes.author?.data
+          ? {
+              id: post.attributes.author.data.id,
+              username: post.attributes.author.data.attributes.username
+            }
+          : { id: null, username: "Utilisateur inconnu" },
+      }));
+
+      setPosts(postsArray.reverse());
+    } catch (err) {
+      console.error("Erreur fetchPosts:", err);
+    }
   };
 
   useEffect(() => {
-    if (token) fetchPosts();
+    fetchPosts();
   }, [token]);
 
-  // Créer un post
+  // ===== CREER POST =====
   const handleCreatePost = async (e) => {
     e.preventDefault();
     if (!newPost.trim()) return;
 
-    await fetch("http://localhost:1337/api/posts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        text: newPost,
-        user: user.id,
-      }),
-    });
+    try {
+      const res = await fetch("http://localhost:1337/api/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          data: {
+            text: newPost,
+            author: { connect: user.id },
+          },
+        }),
+      });
 
-    setNewPost("");
-    fetchPosts();
+      const json = await res.json();
+      console.log(json);
+      // On ajoute directement le post à la liste pour éviter "Utilisateur inconnu"
+      const newPostData = {
+        id: json.data.id,
+        text: json.data.attributes.text,
+        like: json.data.attributes.like || 0,
+        users_likes: [],
+        author: {
+          id: user.id,
+          username: user.username,
+        },
+      };
+
+      setPosts([newPostData, ...posts]);
+      setNewPost("");
+    } catch (err) {
+      console.error("Erreur création post:", err);
+    }
+  };
+
+  // ===== DELETE POST =====
+  const handleDeletePost = async (postId) => {
+    try {
+      await fetch(`http://localhost:1337/api/posts/${postId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      fetchPosts();
+    } catch (err) {
+      console.error("Erreur suppression post:", err);
+    }
+  };
+
+  // ===== LIKE POST =====
+  const handleLikePost = async (post) => {
+    if (post.users_likes.includes(user.id)) return;
+
+    try {
+      const updatedLikes = post.like + 1;
+      const updatedUsers = [...post.users_likes, user.id];
+
+      await fetch(`http://localhost:1337/api/posts/${post.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          data: {
+            like: updatedLikes,
+            users_likes: updatedUsers,
+          },
+        }),
+      });
+
+      fetchPosts();
+    } catch (err) {
+      console.error("Erreur like post:", err);
+    }
   };
 
   if (!token) {
@@ -75,14 +157,14 @@ const Home = () => {
           <p>{post.text}</p>
           <p>
             Par:{" "}
-            <Link to={`/profile/${post.user.id}`}>
-              {post.user.username}
-            </Link>
+            <Link to={`/profile/${post.author.id}`}>{post.author.username}</Link>
           </p>
-          {post.user.id === user.id && (
-            <button>Supprimer</button>
+          <button onClick={() => handleLikePost(post)}>
+            Like ({post.like})
+          </button>
+          {post.author.id === user.id && (
+            <button onClick={() => handleDeletePost(post.id)}>Supprimer</button>
           )}
-          <button>Like ({post.like})</button>
         </div>
       ))}
     </div>

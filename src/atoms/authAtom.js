@@ -5,4 +5,7 @@ import Cookies from "js-cookie";
 export const tokenAtom = atom(Cookies.get("token") || null);
 
 // Infos utilisateur connecté
-export const userAtom = atom(JSON.parse(Cookies.get("user") || "null"));
+export const userAtom = atom(() => {
+  const cookie = Cookies.get("user");
+  return cookie ? JSON.parse(cookie) : null;
+});
