@@ -1,12 +1,25 @@
-# React + Vite
+# My social - network
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+This is a simple social network application built with React for the frontend and Strapi as the backend. It allows users to:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Create posts
+- Like posts
+- Delete their own posts
+- View posts from all users
 
-## Expanding the ESLint configuration
+The project demonstrates the use of global state management with Jotai, JWT authentication, and REST API interactions with Strapi.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Features
+
+1. **User Authentication**
+   - Login and signup handled via Strapi Users & Permissions plugin
+   - JWT tokens stored in global state using Jotai
+
+2. **Posts**
+   - Users can create posts (text only)
+   - Posts show the author username
+   - Users can delete their own posts
+   - Users can like posts
