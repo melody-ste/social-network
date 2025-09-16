@@ -23,9 +23,6 @@ const Login = () => {
     if (data.jwt) {
       setToken(data.jwt);
       setUser(data.user);
-
-      Cookies.set("token", data.jwt, { expires: 7 });
-      Cookies.set("user", JSON.stringify(data.user), { expires: 7 });
       
       navigate("/profile");
     } else {
